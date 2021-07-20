@@ -1,6 +1,7 @@
 package hello.core.autowired;
 
 import hello.core.AppConfig;
+import hello.core.AutoAppConfig;
 import hello.core.discount.DiscountPolicy;
 import hello.core.discount.FixDiscountPolicy;
 import hello.core.member.Grade;
@@ -14,17 +15,22 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class AllBeanTest {
 
     @Test
     void findAllBean() {
-        ApplicationContext ac = new AnnotationConfigApplicationContext(AppConfig.class, DiscountService.class);
+        ApplicationContext ac = new AnnotationConfigApplicationContext(AutoAppConfig.class, DiscountService.class);
         DiscountService discountService = ac.getBean(DiscountService.class);
         Member member = new Member(1L, "userA", Grade.VIP);
         int discountPrice = discountService.discount(member, 10000, "fixDiscountPolicy");
 
-        Assertions.assertThat(discountService).isInstanceOf(DiscountService.class);
-        Assertions.assertThat(discountPrice).isEqualTo(1000);
+        assertThat(discountService).isInstanceOf(DiscountService.class);
+        assertThat(discountPrice).isEqualTo(1000);
+
+        int rateDiscountPolicy = discountService.discount(member, 20000, "rateDiscountPolicy");
+        assertThat(rateDiscountPolicy).isEqualTo(2000);
 
     }
 
@@ -36,10 +42,6 @@ public class AllBeanTest {
         public DiscountService(Map<String, DiscountPolicy> policyMap, List<DiscountPolicy> policyList) {
             this.policyMap = policyMap;
             this.policyList = policyList;
-
-            for (String s : policyMap.keySet()) {
-                System.out.println("s = " + s);
-            }
 
             System.out.println("policyMap = " + policyMap);
             System.out.println("policyList = " + policyList);
